@@ -18,9 +18,9 @@ call vundle#rc()
 Bundle 'gmarik/vundle'
 Bundle 'L9'
 Bundle 'FuzzyFinder'
-Bundle 'wombat'
 Bundle 'itchyny/lightline.vim'
 Bundle 'godlygeek/tabular'
+Bundle 'junegunn/vim-easy-align'
 Bundle 'scrooloose/nerdcommenter'
 Bundle 'scrooloose/nerdtree'
 Bundle 'scrooloose/syntastic'
@@ -31,35 +31,60 @@ Bundle 'fholgado/minibufexpl.vim'
 Bundle 'Shougo/neocomplcache'
 Bundle 'michaeljsmith/vim-indent-object'
 Bundle 'terryma/vim-multiple-cursors'
-Bundle 'parameter_objects'
-Bundle 'python-syntax'
+Bundle 'Parameter-Text-Objects'
+Bundle 'osyo-manga/vim-over'
+"Bundle 'davidhalter/jedi-vim'
 
+
+Bundle 'python-syntax'
+"this won't work as this is mine based on official bundle
+"Bundle 'Python-Syntax'
+"but I added few changes
+
+"Fancy colors 
+Bundle 'Wombat'
+Bundle 'Mustang2'
+Bundle 'nanotech/jellybeans.vim'
+Bundle 'tomasr/molokai'
+Bundle 'blackboard.vim'
+Bundle 'sjl/badwolf'
 
 filetype plugin indent on " Enable filetype plugin
-set nocompatible "disable vi compatibility
+set nocompatible          " disable vi compatibility
 "}
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " === General
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-set history=1000          " remember more commands and search history
-set undolevels=1000       " use many muchos levels of undo
-set autoread              " Set to auto read when a file is changed from the outside
-au FocusLost * silent! wa " autosave on focuslost(ignore warn on untitled buffs)
+set history=1000                      " remember more commands and search history
+set undolevels=1000                   " use many muchos levels of undo
+set autoread                          " Set to auto read when a file is changed from the outside
+au FocusLost * silent! wa!            " autosave on focuslost(ignore warn on untitled buffs)
 
 set encoding=utf-8
-set laststatus=2          " always show the status line
+set laststatus=2                      " always show the status line
+set noshowmode
 
 
 set backup
-set noswapfile            " do not create swaps files
+set noswapfile                        " do not create swaps files
 set undofile
 set undoreload=10000
 
-set undodir=$HOME/.vim/tmp/undo// "undo files
-set backupdir=$HOME/.vim/tmp/backup// "backup files
-set directory=$HOME/.vim/tmp/swap// "swap files
+function! EnsureDirExists(path) "{{{
+    if !isdirectory(expand(a:path))
+      call mkdir(expand(a:path))
+    endif
+endfunction "}}}
+
+call EnsureDirExists($HOME . '/.vim/tmp/undo//')
+call EnsureDirExists($HOME . '/.vim/tmp/backup//')
+call EnsureDirExists($HOME . '/.vim/tmp/swap//')
+
+set undodir=$HOME/.vim/tmp/undo//     " undo files
+set backupdir=$HOME/.vim/tmp/backup// " backup files
+set directory=$HOME/.vim/tmp/swap//   " swap files
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " === VIM USER INTERFACE
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -67,18 +92,24 @@ set directory=$HOME/.vim/tmp/swap// "swap files
 set title                " change the terminal's title
 set titlestring=%t%(\ %M%)%(\ (%{expand(\"%:~:.:h\")})%)%(\ %a%)
 
-au GUIEnter * simalt ~x      " start maximized window
+if has('win32') || has('gui_running')
+    au GUIEnter * simalt ~x      " start maximized window
+endif
+
 set number                   " always show line numbers
 set ttyfast                  " smooth char drawing
 set guioptions-=T            " do not show toolbar
 set guioptions-=L            " Disable left scroll
 set guioptions-=R            " Disable right scroll
 set guioptions-=r            " Disable right scroll always
+set guioptions-=m            " Disable menu bar
+
+" shortcut toggle menu visibility
+nnoremap <leader>M :if &go=~#'m'<Bar>set go-=m<Bar>else<Bar>set go+=m<Bar>endif<CR>
 
 " --- Long lines
-set nowrap        " don't wrap lines
-
-set ruler "show cursor location in status line
+set nowrap " don't wrap lines
+set ruler  " show cursor location in status line
 
 " --- Colors, fonts
 if &t_Co >= 256 || has("gui_running")
@@ -86,19 +117,17 @@ if &t_Co >= 256 || has("gui_running")
   noremap <C-K> <C-W>k
   noremap <C-H> <C-W>h
   noremap <C-L> <C-W>l
-    "colorscheme desert 
    colorscheme wombat
-   "colorscheme badwolf
    set background=dark
-   "colorscheme mustang
-   "colorscheme blackboard
 endif
 if &t_Co > 2 || has("gui_running")
    " switch syntax highlighting on, when the terminal has colors
    syntax on
 endif
 
-set gfn=Consolas:h11:cDEFAULT
+if has('win32')
+    set gfn=Consolas:h11:cDEFAULT
+endif
 
 " colors for FoldColumn
 highlight FoldColumn guifg=#857b6f guibg=#000000
@@ -138,25 +167,21 @@ hi CursorColumn guibg=#202020 ctermbg=236
 hi MatchParen gui=bold,underline  guibg=bg guifg=Violet guisp=#dd3333
 
 " --- Tabs, indent etc. {{{
-set tabstop=4     " a tab is four spaces
-:set backspace=indent,eol,start
-                  " allow backspacing over everything in insert mode
-set autoindent    " always set autoindenting on
-set copyindent    " copy the previous indentation on autoindenting
-set shiftwidth=4  " number of spaces to use for autoindenting
-set shiftround    " use multiple of shiftwidth when indenting with '<' and '>'
-set smarttab      " insert tabs on the start of a line according to
-                  "    shiftwidth, not tabstop
-set expandtab     " insert spaces istead of tabs
-set textwidth=120  
-set softtabstop=4 " Number of spaces that a <Tab> counts for while performing 
-                  " editing operations, like inserting a <Tab> or using <BS>.
-set winaltkeys=no "turn off the menu shortcuts
+set tabstop=4                   " a tab is four spaces
+:set backspace=indent,eol,start " allow backspacing over everything in insert mode
+set autoindent                  " always set autoindenting on
+set copyindent                  " copy the previous indentation on autoindenting
+set shiftwidth=4                " number of spaces to use for autoindenting
+set shiftround                  " use multiple of shiftwidth when indenting with '<' and '>'
+set smarttab                    " insert tabs on the start of a line according to shiftwidth, not tabstop
+set expandtab                   " insert spaces istead of tabs
+set textwidth=120
+set softtabstop=4               " Number of spaces that a <Tab> counts , during inserting a <Tab> or using <BS> etc.
+set winaltkeys=no               " turn off the menu shortcuts
 
 " --- Searching, substitution and matching
 set ignorecase    " ignore case when searching
-set smartcase     " ignore case if search pattern is all lowercase,
-                  "    case-sensitive otherwise
+set smartcase     " ignore case if search pattern is all lowercase,    case-sensitive otherwise
 set hlsearch      " highlight search terms
 set incsearch     " show search matches as you type
 set showmatch     " set show matching parenthesis
@@ -165,8 +190,11 @@ set gdefault      " global substitution by default
 " --- Error indicator
 set visualbell    " don't beep
 set noerrorbells  " don't beep
-set t_vb=         " this in fact do not have effect here, put it to gvimrc }}}
+"do not flash
+set t_vb=         
+" this in fact do not have effect here, put it to gvimrc }}}
     
+
 
 "set list listchars=trail:·   "show trailing spaces
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -178,7 +206,7 @@ set ofu=syntaxcomplete#Complete
 set completeopt=longest,menuone
 
 "autocmd FileType python set complete+=k~/.vim/syntax/python.vim
-autocmd filetype python set expandtab
+"au FileType python setlocal completeopt-=preview
 "autocmd FileType python compiler pylint
 
 "switch auto formating for paste/edit
@@ -188,6 +216,7 @@ set mouse=a
 
 "speed up parenthesis matching
 set matchtime=3
+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "    KEY SHORTCUTS
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -229,6 +258,12 @@ noremap <C-K> <C-W>k
 noremap <C-H> <C-W>h
 noremap <C-L> <C-W>l
 
+"turn off stupid shortcuts
+"ex mode - run macro in q register
+:nmap Q @q
+
+
+
 
 " Execute file being edited with <F9>
 map <buffer> <F9> :w<CR>:!c:\Python27\python.exe % <CR>
@@ -252,14 +287,6 @@ au WinLeave * setlocal nocursorcolumn
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " === PLUGINS
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Plugins_Included:
-"pathogen bundle directory:
-"ack-plugin ***indent-object *indent_guides 
-"parameter_objects 
-"repeat 
-"text_objects 
-
-"
 " --- miniBufExplorer --------------------
  " MiniBufExplorer
 "highlight MBENormal         guifg=darkgray
@@ -272,9 +299,9 @@ let g:miniBufExplorerMoreThanOne = 0
 
 
 " --- NERDTree --------------------
-nmap <leader>n :NERDTreeClose<CR>:NERDTreeToggle<CR>
+nmap <leader>n :NERDTreeToggle<CR>
 nmap <leader>m :NERDTreeClose<CR>:NERDTreeFind<CR>
-nmap <leader>N :NERDTreeClose<CR>
+
 " Store the bookmarks file
 "let NERDTreeBookmarksFile=expand("$HOME/.vim/NERDTreeBookmarks")
 
@@ -436,3 +463,8 @@ if has("gui_running")
     highlight SpellBad term=underline gui=undercurl guisp=Orange
 endif 
 
+" ---- clearcase shortcuts ----------------
+nnoremap <leader>co :silent !cleartool co -nco %<CR>
+
+" ---- over.vim shortcuts ----------------
+nnoremap <leader>s :OverCommandLine<CR>
