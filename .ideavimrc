@@ -1,0 +1,240 @@
+let mapleader=" "
+
+""" Plugins  --------------------------------
+set surround
+set multiple-cursors
+set commentary
+set argtextobj
+set easymotion
+set textobj-entire
+set ReplaceWithRegister
+set exchange
+set vim-paragraph-motion
+set textobj-indent
+set functiontextobj
+set highlightedyank
+set matchit
+
+" Trying the new syntax
+Plug 'machakann/vim-highlightedyank'
+
+""" Plugin settings -------------------------
+let g:argtextobj_pairs="[:],(:),<:>"
+
+" <C-n> seems to me as a better solution than <M-n>,
+" but we should finally support vim-visual-multi because vim-multiple-cursors is deprecated now
+map <C-n> <Plug>NextWholeOccurrence
+
+""" Common settings -------------------------
+"Show a few lines of context around the cursor. Note that this makes the
+"text scroll if you mouse-click near the start or end of the window.
+set scrolloff=5
+" Do incremental searching.
+set showmode
+set so=5
+set incsearch
+set noh
+"set hlsearch
+"smart case can be turned on only if ingorecase is on set ignorecase smartcase
+"smart join detecting programming languange
+set nu
+
+
+""" Idea  quirks ------------------
+"Don't use Ex mode, use Q for formatting.
+map Q gq
+" turn off bell
+set visualbell
+
+""" Idea specific settings ------------------
+set ideajoin
+set ideastatusicon=gray
+set idearefactormode=visual
+
+""" my settings v1------------------
+
+" camel case settings------------------
+" Toggle case and start typing. E.g. `<leader>iget`: `property` -> `getProperty`
+map <leader>i ~hi
+
+" Remove selection and toggle case. E.g. `v2l<leader>u`: `getProperty` -> `property`
+vmap <leader>u d~h
+
+
+"Toggle case and start typing. E.g. <leader>iget: `property` ->getProperty`
+map <leader>i ~hi
+
+"Remove selection and toggle case. E.g. v2l<leader>d: getProperty` -> `property
+vmap <leader>u d~h
+
+"Remove camel word and toggle case. E.g. l<leader>d`: `getProperty` -> `property
+map <leader>u d]w~h
+
+"move to next upper case letter, good for Camel Case
+nmap <leader>w [w
+vmap <leader>w [w
+map leader>w [w
+
+"change current camel word, good for Camel Case
+map ci<leader>w [w[bv]ws
+map c<leader>w [w[bv]ws
+map <leader>c [w[bv]ws
+map 2<Leader>c [w[bv2]ws
+map 3<Leader>c [w[bv3]ws
+
+"select current camel word, good for Camel Case
+map vi<leader>w [w[bv]w
+map v<leader>w [w[bv]w
+map <leader>d [w[bv]wd
+" end of camel case settings------------------
+
+"go to (t)est
+map gt <Action>(GotoTest)
+map <leader>t <Action>(RerunTests)
+map <leader>T <Action>(Rerun FailedTests)
+
+"(r)ename
+map <leader>r <Action>(Rename Element)
+"update (a)rguments
+map <leader>a <Action>(ChangeSignature)
+
+""" My Mappings -----------------------------
+map <leader>f <Plug>(easymotion-s)
+map <leader>e <Plug>(easymotion-f)
+
+map <leader>d <Action>(Debug)
+map <leader>c <Action>(Stop)
+
+map <leader>a <Action>(Annotate)
+map <leader>h <Action>(Vcs.ShowTabbedFileHistory)
+
+" Reformat the current line only
+map <leader>l V<Action>(ReformatCode)
+
+map <leader>b <Action>(ToggleLineBreakpoint)
+map <leader>o <Action>(FileStructurePopup)
+
+" join with space - default join merges words
+map <leader>J Ji <ESC>
+
+
+"show in project view
+map <leader>1 <Action>(SelectInProjectView)
+
+--------------------------------------------------
+""" menu navigation settings-----------------------------
+nnoremap <c-j> <Action>
+nnoremap <c-k> <Action>
+
+--------------------------------------------------
+""" windows splits settings-----------------------------
+nnoremap <c-w>l <Action>
+nnoremap <c-w>h <Action>
+nnoremap <c-w>k <Action>
+nnoremap <c-w>j <Action>
+
+--------------------------------------------------
+""" surround plugin settings-----------------------------
+vmap <Leader>' S'
+vmap <leader>" S"
+vmap <leader>{ S{
+vmap <leader>} S}
+vmap <leader>[ S]
+vmap <leader>] S]
+vmap <Leader>( S)
+vmap <leader>) S)
+
+nmap <Leader>' viwS'
+nmap <leader>" viwS"
+nmap <leader>{ viwS{
+nmap <leader>} viwS}
+nmap <leader>[ viwS]
+nmap <leader>] viwS]
+nmap <leader>( viwS)
+nmap <leader>) viwS)
+
+""" end of surround plugin settings-----------------------------
+--------------------------------------------------
+""" languange jumps settings------------------------
+
+"go to class line
+nmap <leader>gg / class <Enter>
+
+"map \r <Action>(ReformatCode)
+"Map <Leader>d to start debug
+"map <leader>d <Action>(Debug)
+
+"Map \b to toggle the breakpoint on the current line
+
+"go to (d)eclaration / find usages
+map gd <Action>(GotoDefinition)
+map gu <Action>(FindUsages)
+map gU <Action>(FindUsagesInFile)
+nmap gI <Action>(GotoImplementation)
+
+" bring up the error popup
+map gh <Action>(ShowErrorDescription)
+
+" move to next/prev error (like F2)
+map ge <Action>(GotoNextError)
+map gE <Action>(GotoPreviousError)
+" Map to bring up the Recent Files popup
+map gl :action RecentFiles<CR>
+
+--------------------------------------------------
+""" jumps settings------------------------
+map gi <Action>(JumpToLastChange)i
+map g; <Action>(JumpToLastChange)
+map g, <Action>(JumpToNextChange)
+
+" find a word/WORD in project
+map <Leader>f vaw<Action>(FindInPath)
+map <Leader>F vaW<Action>(FindInPath)
+" move to next/prev item on find list
+map gf <Action>(JumpNextError)
+map gF <Action>(JumpPreviousError)
+
+" move to next/prev location
+nmap <C-o> <Action>(Back)
+nmap <C-i> <Action>(Forward)
+""" jumps settings------------------------
+--------------------------------------------------
+
+
+--------------------------------------------------
+
+
+" integrate marks with Intellij--------------------------------------------------
+" intellij only recognize marks with capital letters
+nmap ma mA
+nmap mb mB
+nmap mc mC
+nmap mm mM
+nmap mn mN
+nmap `a `A
+nmap `b `B
+nmap `c `C
+nmap `m `M
+nmap `n `N
+nmap 'a 'A
+nmap 'b 'B
+nmap 'c 'C
+nmap 'm 'M
+nmap 'n 'N
+
+" select a function/method--------------------------------------------------
+map vim <Action>(MethodUp)my<Action>(MethodDown)?}<CR>V'y
+map vam <Action>(MethodUp)my<Action>(MethodDown)?}<CR>V'y<Action>(EditorSelectWord)
+map <leader>m vam
+
+" folds: ZM ZR zo zo zC zc za zm zr
+
+
+" Define a function to toggle between states
+function! ToggleEditorState()
+    execute ":action MaximizeEditorInSplit"
+    execute ":action ToggleDistractionFreeMode"
+endfunction
+
+" Map the toggle function to a key
+map <Leader>z :call ToggleEditorState()<CR>
